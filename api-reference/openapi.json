@@ -1,94 +1,1336 @@
 {
-  "openapi": "3.1.0",
+  "openapi": "3.0.3",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
-    },
-    "version": "1.0.0"
+    "title": "Polinate External API",
+    "version": "1.0.0",
+    "description": "External API for partners and services. Authentication via X-Business-Id and X-API-Key headers.\n\nCredentials location: In the Polinate app, navigate to Business Settings → Integrations to find your Business ID and API Key."
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
+      "url": "https://integrations.polinate.ai",
+      "description": "Production"
     }
   ],
-  "security": [
+  "tags": [
     {
-      "bearerAuth": []
+      "name": "Items",
+      "description": "Manage items and item variants. Auth: X-Business-Id and X-API-Key (see Business Settings → Integrations)."
+    },
+    {
+      "name": "Buyers",
+      "description": "Create buyers and related contacts/locations. Auth: X-Business-Id and X-API-Key (see Business Settings → Integrations)."
+    },
+    {
+      "name": "Pricing",
+      "description": "Create price lists and entries. Auth: X-Business-Id and X-API-Key (see Business Settings → Integrations)."
+    },
+    {
+      "name": "Invoices",
+      "description": "List and update invoices. Auth: X-Business-Id and X-API-Key (see Business Settings → Integrations)."
+    },
+    {
+      "name": "Orders",
+      "description": "Order ingestion. Auth: X-Business-Id and X-API-Key (see Business Settings → Integrations)."
     }
   ],
-  "paths": {
-    "/plants": {
-      "get": {
-        "description": "Returns all plants from the system that the user has access to",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
+  "components": {
+    "schemas": {
+      "StandardError": {
+        "type": "object",
+        "properties": {
+          "errorCode": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "fieldErrors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
             }
           }
+        },
+        "required": [
+          "errorCode",
+          "message"
+        ]
+      },
+      "InvoiceLineItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "invoiceId": {
+            "type": "string"
+          },
+          "itemVariantId": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "invoiceId"
+        ]
+      },
+      "Invoice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DELETED",
+              "DRAFT",
+              "AUTHORISED",
+              "PARTIALLY_PAID",
+              "PAID",
+              "OVERPAID",
+              "OVERDUE",
+              "VOIDED",
+              "DEFAULTED",
+              "CREDITED",
+              "REFUNDED"
+            ]
+          },
+          "reference": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {}
+          },
+          "invoiceLineItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceLineItem"
+            }
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "ItemPublicInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "handle": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "imgUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "customType": {
+            "type": "string",
+            "nullable": true
+          },
+          "brand": {
+            "type": "string",
+            "nullable": true
+          },
+          "vendorName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "ItemVariantPublicInput": {
+        "type": "object",
+        "properties": {
+          "variantName": {
+            "type": "string"
+          },
+          "sku": {
+            "type": "string",
+            "nullable": true
+          },
+          "barcode": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "USD",
+              "EUR",
+              "GBP",
+              "CAD",
+              "AUD",
+              "NZD",
+              "CHF",
+              "JPY",
+              "CNY",
+              "INR",
+              "BRL",
+              "MXN",
+              "ARS",
+              "COP",
+              "PHP"
+            ]
+          },
+          "price": {
+            "type": "number"
+          },
+          "cost": {
+            "type": "number"
+          },
+          "weight": {
+            "type": "number",
+            "nullable": true
+          },
+          "length": {
+            "type": "number",
+            "nullable": true
+          },
+          "width": {
+            "type": "number",
+            "nullable": true
+          },
+          "height": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "variantName"
+        ]
+      },
+      "ItemCreateRequest": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "handle": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "BEVERAGE",
+                  "VEGETABLE",
+                  "FRUIT",
+                  "MEAT",
+                  "DAIRY",
+                  "CLEANING",
+                  "CONDIMENT",
+                  "DRY_GOOD",
+                  "FROZEN_FOOD",
+                  "BAKERY",
+                  "POULTRY",
+                  "DISPOSABLE",
+                  "SEAFOOD",
+                  "OTHER"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "ACTIVE",
+                  "DRAFT",
+                  "ARCHIVED",
+                  "DELETED"
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "handle",
+              "type",
+              "status"
+            ],
+            "additionalProperties": false
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "variantName": {
+                  "type": "string"
+                },
+                "currency": {
+                  "type": "string",
+                  "enum": [
+                    "USD",
+                    "EUR",
+                    "GBP",
+                    "CAD",
+                    "AUD",
+                    "NZD",
+                    "CHF",
+                    "JPY",
+                    "CNY",
+                    "INR",
+                    "BRL",
+                    "MXN",
+                    "ARS",
+                    "COP",
+                    "PHP"
+                  ]
+                },
+                "price": {
+                  "type": "number"
+                },
+                "cost": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "variantName",
+                "currency",
+                "price",
+                "cost"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "item",
+          "variants"
+        ]
+      },
+      "BuyerPublic": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "legalName": {
+            "type": "string"
+          },
+          "primaryEmail": {
+            "type": "string",
+            "format": "email"
+          },
+          "primaryPhone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "legalName"
+        ]
+      },
+      "BuyerInfoPublic": {
+        "type": "object",
+        "properties": {}
+      },
+      "BuyerPhonePublic": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string"
+          },
+          "contactName": {
+            "type": "string"
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "isVerified": {
+            "type": "boolean"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sequence": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "phone"
+        ]
+      },
+      "BuyerEmailPublic": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "contactName": {
+            "type": "string"
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "isVerified": {
+            "type": "boolean"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sequence": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "BuyerLocationPublic": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "WAREHOUSE",
+              "DISTRIBUTION",
+              "STORE"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "INACTIVE",
+              "DELETED"
+            ]
+          },
+          "addressLine1": {
+            "type": "string"
+          },
+          "addressLine2": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "postcode": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "type",
+          "status",
+          "addressLine1",
+          "city",
+          "state",
+          "postcode",
+          "country"
+        ]
+      },
+      "BuyerCreateRequestPublic": {
+        "type": "object",
+        "properties": {
+          "buyer": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "legalName": {
+                "type": "string"
+              },
+              "primaryEmail": {
+                "type": "string",
+                "format": "email"
+              },
+              "primaryPhone": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "legalName"
+            ]
+          },
+          "buyerInfo": {
+            "type": "object",
+            "properties": {}
+          },
+          "phones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phone": {
+                  "type": "string"
+                },
+                "contactName": {
+                  "type": "string"
+                },
+                "isPrimary": {
+                  "type": "boolean"
+                },
+                "isVerified": {
+                  "type": "boolean"
+                },
+                "verifiedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "sequence": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "phone"
+              ]
+            },
+            "default": []
+          },
+          "emails": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "contactName": {
+                  "type": "string"
+                },
+                "isPrimary": {
+                  "type": "boolean"
+                },
+                "isVerified": {
+                  "type": "boolean"
+                },
+                "verifiedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "sequence": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "email"
+              ]
+            },
+            "default": []
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "WAREHOUSE",
+                    "DISTRIBUTION",
+                    "STORE"
+                  ]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "DRAFT",
+                    "ACTIVE",
+                    "INACTIVE",
+                    "DELETED"
+                  ]
+                },
+                "addressLine1": {
+                  "type": "string"
+                },
+                "addressLine2": {
+                  "type": "string"
+                },
+                "city": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string"
+                },
+                "postcode": {
+                  "type": "string"
+                },
+                "country": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "label",
+                "type",
+                "status",
+                "addressLine1",
+                "city",
+                "state",
+                "postcode",
+                "country"
+              ]
+            },
+            "default": []
+          }
+        },
+        "required": [
+          "buyer"
         ],
+        "example": {
+          "buyer": {
+            "name": "Acme Pty Ltd",
+            "legalName": "Acme Pty Ltd"
+          }
+        }
+      },
+      "ItemListPublic": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "globalPriceFactor": {
+            "type": "number",
+            "nullable": true
+          },
+          "globalCostFactor": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "label"
+        ]
+      },
+      "ItemListEntryPublic": {
+        "type": "object",
+        "properties": {
+          "itemVariantId": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "cost": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "USD",
+              "EUR",
+              "GBP",
+              "CAD",
+              "AUD",
+              "NZD",
+              "CHF",
+              "JPY",
+              "CNY",
+              "INR",
+              "BRL",
+              "MXN",
+              "ARS",
+              "COP",
+              "PHP"
+            ]
+          }
+        },
+        "required": [
+          "itemVariantId"
+        ]
+      },
+      "ItemCreateResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "success",
+          "id"
+        ]
+      },
+      "BuyerCreateRequest": {
+        "type": "object",
+        "properties": {
+          "buyer": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name"
+            ]
+          },
+          "buyerInfo": {
+            "type": "object",
+            "properties": {}
+          },
+          "phones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phone": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "phone"
+              ]
+            }
+          },
+          "emails": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                }
+              },
+              "required": [
+                "email"
+              ]
+            }
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "addressLine1": {
+                  "type": "string"
+                },
+                "city": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string"
+                },
+                "postcode": {
+                  "type": "string"
+                },
+                "country": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "addressLine1",
+                "city",
+                "state",
+                "postcode",
+                "country"
+              ]
+            }
+          }
+        },
+        "required": [
+          "buyer"
+        ]
+      },
+      "BuyerCreateResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "success",
+          "id"
+        ]
+      },
+      "PricingCreateRequest": {
+        "type": "object",
+        "properties": {
+          "businessId": {
+            "type": "string"
+          },
+          "list": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "label"
+            ]
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "itemVariantId": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "itemVariantId"
+              ]
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "businessId",
+          "list",
+          "entries"
+        ]
+      },
+      "PricingCreateResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "OrdersPostRequest": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string"
+          },
+          "businessId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "orderId",
+          "businessId"
+        ]
+      },
+      "OrdersPostResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "Paginated_ZodObject": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Invoice"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize"
+        ]
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/api/v1/items": {
+      "post": {
+        "operationId": "createItem",
+        "summary": "Create an item and its variants",
+        "description": "Create a parent item and its variants in one request. Idempotent via Idempotency-Key.",
+        "tags": [
+          "Items"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Business identifier for external auth. Find in Polinate app → Business Settings → Integrations.",
+              "example": "{{businessId}}"
+            },
+            "required": true,
+            "name": "X-Business-Id",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Per-business API key for external auth. Find in Polinate app → Business Settings → Integrations.",
+              "example": "{{apiKey}}"
+            },
+            "required": true,
+            "name": "X-API-Key",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Idempotency key for POST operations",
+              "example": "{{idempotencyKey}}"
+            },
+            "required": false,
+            "name": "Idempotency-Key",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Correlation ID for observability",
+              "example": "{{requestId}}"
+            },
+            "required": false,
+            "name": "X-Request-Id",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemCreateRequest"
+              },
+              "example": {
+                "item": {
+                  "name": "Widget",
+                  "handle": "widget-1",
+                  "type": "OTHER",
+                  "status": "ACTIVE"
+                },
+                "variants": [
+                  {
+                    "variantName": "Default",
+                    "currency": "AUD",
+                    "price": 12.34,
+                    "cost": 8.5
+                  }
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Plant response",
+            "description": "Created",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
+                  "$ref": "#/components/schemas/ItemCreateResponse"
+                },
+                "example": {
+                  "success": true,
+                  "id": "itm_123"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/buyers": {
+      "post": {
+        "operationId": "createBuyer",
+        "summary": "Create a buyer (phantom) and related contacts/locations",
+        "description": "Creates a buyer (phantom) with optional contacts and locations; links default item list for the supplier business. Idempotent via Idempotency-Key.",
+        "tags": [
+          "Buyers"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Business identifier for external auth. Find in Polinate app → Business Settings → Integrations.",
+              "example": "{{businessId}}"
+            },
+            "required": true,
+            "name": "X-Business-Id",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Per-business API key for external auth. Find in Polinate app → Business Settings → Integrations.",
+              "example": "{{apiKey}}"
+            },
+            "required": true,
+            "name": "X-API-Key",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Idempotency key for POST operations",
+              "example": "{{idempotencyKey}}"
+            },
+            "required": false,
+            "name": "Idempotency-Key",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Correlation ID for observability",
+              "example": "{{requestId}}"
+            },
+            "required": false,
+            "name": "X-Request-Id",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyerCreateRequestPublic"
+              },
+              "examples": {
+                "Minimal": {
+                  "summary": "Minimal required fields",
+                  "value": {
+                    "buyer": {
+                      "name": "Acme Pty Ltd",
+                      "legalName": "Acme Pty Ltd"
+                    }
+                  }
+                },
+                "Full": {
+                  "summary": "All fields with multiple contacts and locations",
+                  "value": {
+                    "buyer": {
+                      "name": "Globex Trading Co",
+                      "legalName": "Globex Trading Company Pty Ltd",
+                      "primaryEmail": "accounts@globex.example",
+                      "primaryPhone": "+61 2 9000 0000"
+                    },
+                    "buyerInfo": {
+                      "taxNumber": "ABN 12 345 678 901"
+                    },
+                    "emails": [
+                      {
+                        "email": "orders@globex.example",
+                        "contactName": "Procurement",
+                        "isPrimary": true,
+                        "isVerified": true,
+                        "verifiedAt": "2025-01-15T10:00:00.000Z",
+                        "sequence": 1
+                      },
+                      {
+                        "email": "warehouse@globex.example",
+                        "contactName": "Warehouse",
+                        "isPrimary": false,
+                        "isVerified": false,
+                        "sequence": 2
+                      }
+                    ],
+                    "phones": [
+                      {
+                        "phone": "+61 400 000 001",
+                        "contactName": "Procurement",
+                        "isPrimary": true,
+                        "isVerified": true,
+                        "verifiedAt": "2025-01-15T10:00:00.000Z",
+                        "sequence": 1
+                      },
+                      {
+                        "phone": "+61 400 000 002",
+                        "contactName": "Receiving",
+                        "isPrimary": false,
+                        "isVerified": false,
+                        "sequence": 2
+                      }
+                    ],
+                    "locations": [
+                      {
+                        "label": "Sydney DC",
+                        "type": "WAREHOUSE",
+                        "status": "ACTIVE",
+                        "addressLine1": "1 George St",
+                        "addressLine2": "Dock 3",
+                        "city": "Sydney",
+                        "state": "NSW",
+                        "postcode": "2000",
+                        "country": "AU"
+                      },
+                      {
+                        "label": "Melbourne Store",
+                        "type": "STORE",
+                        "status": "ACTIVE",
+                        "addressLine1": "100 Collins St",
+                        "city": "Melbourne",
+                        "state": "VIC",
+                        "postcode": "3000",
+                        "country": "AU"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerCreateResponse"
+                },
+                "example": {
+                  "success": true,
+                  "id": "buy_123"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                },
+                "examples": {
+                  "MissingRequired": {
+                    "summary": "Missing required fields",
+                    "value": {
+                      "errorCode": "VALIDATION_ERROR",
+                      "message": "Some information looks incorrect. Please review the highlighted fields.",
+                      "requestId": "{{requestId}}",
+                      "fieldErrors": {
+                        "buyer.name": "Required",
+                        "buyer.legalName": "Required"
+                      }
+                    }
+                  },
+                  "DuplicateEmails": {
+                    "summary": "Duplicate emails",
+                    "value": {
+                      "errorCode": "VALIDATION_ERROR",
+                      "message": "Some information looks incorrect. Please review the highlighted fields.",
+                      "requestId": "{{requestId}}",
+                      "fieldErrors": {
+                        "emails.1.email": "Duplicate email addresses are not allowed."
+                      }
+                    }
+                  },
+                  "DuplicatePhones": {
+                    "summary": "Duplicate phones",
+                    "value": {
+                      "errorCode": "VALIDATION_ERROR",
+                      "message": "Some information looks incorrect. Please review the highlighted fields.",
+                      "requestId": "{{requestId}}",
+                      "fieldErrors": {
+                        "phones.1.phone": "Duplicate phone numbers are not allowed."
+                      }
+                    }
+                  },
+                  "DuplicateLocationLabels": {
+                    "summary": "Duplicate location labels",
+                    "value": {
+                      "errorCode": "VALIDATION_ERROR",
+                      "message": "Some information looks incorrect. Please review the highlighted fields.",
+                      "requestId": "{{requestId}}",
+                      "fieldErrors": {
+                        "locations.1.label": "Duplicate location labels are not allowed."
+                      }
+                    }
                   }
                 }
               }
             }
           },
-          "400": {
-            "description": "Unexpected error",
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plant"
+                  "$ref": "#/components/schemas/StandardError"
+                },
+                "example": {
+                  "errorCode": "UNAUTHORIZED",
+                  "message": "Unauthorized",
+                  "requestId": "{{requestId}}"
                 }
               }
             }
           },
-          "400": {
-            "description": "unexpected error",
+          "409": {
+            "description": "Conflict (DB unique constraint)",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/StandardError"
+                },
+                "examples": {
+                  "EmailConflict": {
+                    "summary": "Buyer email unique",
+                    "value": {
+                      "errorCode": "CONFLICT",
+                      "message": "This buyer already has that email address.",
+                      "requestId": "{{requestId}}"
+                    }
+                  },
+                  "PhoneConflict": {
+                    "summary": "Buyer phone unique",
+                    "value": {
+                      "errorCode": "CONFLICT",
+                      "message": "This buyer already has that phone number.",
+                      "requestId": "{{requestId}}"
+                    }
+                  },
+                  "LocationLabelConflict": {
+                    "summary": "Location label unique",
+                    "value": {
+                      "errorCode": "CONFLICT",
+                      "message": "This buyer already has a location with that label.",
+                      "requestId": "{{requestId}}"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                },
+                "examples": {
+                  "BurstyTraffic": {
+                    "summary": "Too many requests",
+                    "value": {
+                      "errorCode": "RATE_LIMITED",
+                      "message": "You’re sending requests too quickly. Please try again shortly.",
+                      "requestId": "{{requestId}}"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default item list missing or duplicated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                },
+                "example": {
+                  "errorCode": "INTERNAL_ERROR",
+                  "message": "Default item list missing or duplicated",
+                  "requestId": "{{requestId}}"
                 }
               }
             }
@@ -96,121 +1338,706 @@
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
+    "/api/v1/pricing": {
+      "post": {
+        "operationId": "createPricing",
+        "summary": "Create a price list and entries",
+        "description": "Creates a price list with entries and optionally assigns it to partnerships (buyers). Idempotent via Idempotency-Key.",
+        "tags": [
+          "Pricing"
+        ],
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+              "type": "string",
+              "description": "Business identifier for external auth. Find in Polinate app → Business Settings → Integrations.",
+              "example": "{{businessId}}"
+            },
+            "required": true,
+            "name": "X-Business-Id",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Per-business API key for external auth. Find in Polinate app → Business Settings → Integrations.",
+              "example": "{{apiKey}}"
+            },
+            "required": true,
+            "name": "X-API-Key",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Idempotency key for POST operations",
+              "example": "{{idempotencyKey}}"
+            },
+            "required": false,
+            "name": "Idempotency-Key",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Correlation ID for observability",
+              "example": "{{requestId}}"
+            },
+            "required": false,
+            "name": "X-Request-Id",
+            "in": "header"
           }
         ],
-        "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "webhooks": {
-    "/plant/webhook": {
-      "post": {
-        "description": "Information about a new plant added to the store",
         "requestBody": {
-          "description": "Plant added to the store",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "type": "object",
+                "properties": {
+                  "itemListData": {
+                    "type": "object",
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "label"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "entries": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "itemListId": {
+                          "type": "string"
+                        },
+                        "itemVariantId": {
+                          "type": "string"
+                        },
+                        "currency": {
+                          "type": "string",
+                          "enum": [
+                            "USD",
+                            "EUR",
+                            "GBP",
+                            "CAD",
+                            "AUD",
+                            "NZD",
+                            "CHF",
+                            "JPY",
+                            "CNY",
+                            "INR",
+                            "BRL",
+                            "MXN",
+                            "ARS",
+                            "COP",
+                            "PHP"
+                          ]
+                        },
+                        "price": {
+                          "type": "number"
+                        },
+                        "cost": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "itemListId",
+                        "itemVariantId"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  },
+                  "partnerships": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "default": []
+                  }
+                },
+                "required": [
+                  "itemListData",
+                  "entries"
+                ]
+              },
+              "example": {
+                "itemListData": {
+                  "label": "Winter 2025"
+                },
+                "entries": [
+                  {
+                    "itemListId": "list_123",
+                    "itemVariantId": "var_123",
+                    "price": 10,
+                    "currency": "AUD"
+                  }
+                ],
+                "partnerships": [
+                  "prt_123"
+                ]
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
-        }
-      },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingCreateResponse"
+                },
+                "example": {
+                  "success": true
+                }
               }
             }
-          }
-        ]
-      },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
           },
-          "message": {
-            "type": "string"
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
           }
         }
       }
     },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
+    "/api/v1/invoices": {
+      "get": {
+        "operationId": "listInvoices",
+        "summary": "List invoices",
+        "description": "Returns a paginated list of invoices with optional filters by creation time, artefact presence, and status.",
+        "tags": [
+          "Invoices"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "exclusiveMinimum": true,
+              "example": 1
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "exclusiveMinimum": true,
+              "example": 20
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2024-01-01T00:00:00Z"
+            },
+            "required": false,
+            "name": "createdSince",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "boolean",
+              "example": true
+            },
+            "required": false,
+            "name": "hasArtefact",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DELETED",
+                "DRAFT",
+                "AUTHORISED",
+                "PARTIALLY_PAID",
+                "PAID",
+                "OVERPAID",
+                "OVERDUE",
+                "VOIDED",
+                "DEFAULTED",
+                "CREDITED",
+                "REFUNDED"
+              ],
+              "example": "PAID"
+            },
+            "required": false,
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Business identifier for external auth. Find in Polinate app → Business Settings → Integrations.",
+              "example": "{{businessId}}"
+            },
+            "required": true,
+            "name": "X-Business-Id",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Per-business API key for external auth. Find in Polinate app → Business Settings → Integrations.",
+              "example": "{{apiKey}}"
+            },
+            "required": true,
+            "name": "X-API-Key",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Correlation ID for observability",
+              "example": "{{requestId}}"
+            },
+            "required": false,
+            "name": "X-Request-Id",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Paginated_ZodObject"
+                },
+                "example": {
+                  "items": [],
+                  "total": 0,
+                  "page": 1,
+                  "pageSize": 20
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/invoices/{id}": {
+      "get": {
+        "operationId": "getInvoice",
+        "summary": "Get an invoice by ID",
+        "description": "Retrieves a single invoice by ID including its line items.",
+        "tags": [
+          "Invoices"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "example": "inv_123"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Business identifier for external auth. Find in Polinate app → Business Settings → Integrations.",
+              "example": "{{businessId}}"
+            },
+            "required": true,
+            "name": "X-Business-Id",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Per-business API key for external auth. Find in Polinate app → Business Settings → Integrations.",
+              "example": "{{apiKey}}"
+            },
+            "required": true,
+            "name": "X-API-Key",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Correlation ID for observability",
+              "example": "{{requestId}}"
+            },
+            "required": false,
+            "name": "X-Request-Id",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invoice"
+                },
+                "example": {
+                  "id": "inv_123",
+                  "status": "PAID",
+                  "invoiceLineItems": []
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateInvoice",
+        "summary": "Update an invoice (partial)",
+        "description": "Partially updates invoice fields such as status, reference, notes, and provider-specific properties. Idempotent via Idempotency-Key.",
+        "tags": [
+          "Invoices"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "example": "inv_123"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Business identifier for external auth. Find in Polinate app → Business Settings → Integrations.",
+              "example": "{{businessId}}"
+            },
+            "required": true,
+            "name": "X-Business-Id",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Per-business API key for external auth. Find in Polinate app → Business Settings → Integrations.",
+              "example": "{{apiKey}}"
+            },
+            "required": true,
+            "name": "X-API-Key",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Idempotency key for POST operations",
+              "example": "{{idempotencyKey}}"
+            },
+            "required": false,
+            "name": "Idempotency-Key",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Correlation ID for observability",
+              "example": "{{requestId}}"
+            },
+            "required": false,
+            "name": "X-Request-Id",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  },
+                  "reference": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "notes": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "properties": {
+                    "type": "object",
+                    "properties": {}
+                  }
+                },
+                "example": {
+                  "status": "PAID",
+                  "reference": "PO-123",
+                  "notes": "Thanks!"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invoice"
+                },
+                "example": {
+                  "id": "inv_123",
+                  "status": "PAID"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders": {
+      "post": {
+        "operationId": "createOrder",
+        "summary": "Notify system that an order has been created (ingestion)",
+        "description": "Idempotent ingestion endpoint. Provide Idempotency-Key computed as sha256(\"${orderId}-${businessId}-order-integration\").",
+        "tags": [
+          "Orders"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Business identifier for external auth. Find in Polinate app → Business Settings → Integrations.",
+              "example": "{{businessId}}"
+            },
+            "required": true,
+            "name": "X-Business-Id",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Per-business API key for external auth. Find in Polinate app → Business Settings → Integrations.",
+              "example": "{{apiKey}}"
+            },
+            "required": true,
+            "name": "X-API-Key",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Idempotency key for POST operations",
+              "example": "{{idempotencyKey}}"
+            },
+            "required": false,
+            "name": "Idempotency-Key",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Correlation ID for observability",
+              "example": "{{requestId}}"
+            },
+            "required": false,
+            "name": "X-Request-Id",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrdersPostRequest"
+              },
+              "example": {
+                "orderId": "ord_123",
+                "businessId": "{{businessId}}"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdersPostResponse"
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload or idempotency key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardError"
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
