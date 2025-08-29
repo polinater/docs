@@ -1,0 +1,58 @@
+---
+title: "Pricing"
+description: "Create price lists and entries via the API"
+icon: "tag"
+---
+
+# Pricing
+
+Use the Pricing API to create a price list with entries and optionally assign it to partnerships (buyers).
+
+## Authentication
+
+Include the following headers in every request:
+- `X-Business-ID`: Your business identifier
+- `X-API-Key`: Your API key
+
+## Create a Price List
+
+Creates a price list and one or more entries.
+
+Endpoint: `POST /api/v1/pricing`
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://integrations.polinate.ai/api/v1/pricing" \
+  -H "X-Business-ID: {{businessId}}" \
+  -H "X-API-Key: {{apiKey}}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "itemListData": { "label": "Winter 2025" },
+    "entries": [
+      { "itemListId": "list_123", "itemVariantId": "var_123", "price": 10, "currency": "AUD" }
+    ],
+    "partnerships": ["prt_123"]
+  }'
+```
+
+```json Successful Response
+{
+  "success": true
+}
+```
+
+```json Unauthorized
+{
+  "errorCode": "UNAUTHORIZED",
+  "message": "Unauthorized",
+  "requestId": "{{requestId}}"
+}
+```
+</CodeGroup>
+
+## Notes
+
+- Include at least one entry in `entries`.
+- Use `Idempotency-Key` header for safe retries on POST requests.
+
+

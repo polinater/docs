@@ -1,0 +1,41 @@
+---
+title: "Rate Limits"
+description: "How Polinate rate limiting works and how to handle 429s"
+icon: "gauge"
+---
+
+# Rate Limits
+
+We use a token bucket model to ensure fair usage and stability.
+
+## Model overview
+
+- A bucket holds a limited number of tokens.
+- Tokens are consumed per request.
+- Tokens are refilled over time at a fixed rate.
+- When the bucket is empty, requests are rate-limited with HTTP 429.
+
+```text
+[Refill Rate] ---> [ Token Bucket ] ---> [Requests]
+                      | empty?
+                      v
+                    429
+```
+
+## Handling 429 responses
+
+- Back off and retry after a short delay.
+- Respect the `Retry-After` header if present.
+- Use batching and idempotency where possible.
+
+## Example 429 response
+
+```json
+{
+  "errorCode": "RATE_LIMITED",
+  "message": "You’re sending requests too quickly. Please try again shortly.",
+  "requestId": "{{requestId}}"
+}
+```
+
+

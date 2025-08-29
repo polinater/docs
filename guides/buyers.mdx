@@ -1,0 +1,121 @@
+---
+title: "Buyers"
+description: "Create buyers and related contacts/locations via the API"
+icon: "users"
+---
+
+# Buyers
+
+In Polinate, a "buyer" is a bundle of multiple underlying resources that work together.
+There are two bundle types, but only one is creatable via API.
+
+<Info>
+You can only create <strong>phantom buyers</strong> via the API. Platform buyers are created by accounts that use the Polinate app directly.
+</Info>
+
+## Buyer bundle types
+
+<CardGroup cols={2}>
+  <Card title="Platform buyer">
+    A business running on Polinate. Created and managed inside the Polinate platform.
+  </Card>
+  
+  <Card title="Phantom buyer">
+    A business <em>not</em> on Polinate. Creatable via API and used to transact with your supplier account.
+  </Card>
+</CardGroup>
+
+## What happens when you create a buyer
+
+Creating a buyer via the API orchestrates several resources in a specific order:
+
+<Steps>
+  <Step title="Partnership is created">
+    We establish the relationship between your supplier business and the new buyer bundle.
+  </Step>
+  
+  <Step title="Phantom (buyer organization) is created">
+    This represents the buyer's organization container where contact data is stored.
+  </Step>
+  
+  <Step title="Phantom buyer is created">
+    The buyer entity shares the <strong>same unique ID</strong> as the parent phantom.
+  </Step>
+</Steps>
+
+## Ownership model
+
+- <strong>Phantom (buyer organization)</strong>: owns locations, phones, and emails.
+- <strong>Partnership</strong>: owns the relationship to your supplier and is where orders and invoices are associated.
+- <strong>Phantom buyer</strong>: shares the same ID as the phantom.
+
+## Relationship map
+
+```text
+Supplier (you)
+└─ Partnership (prt_...)
+   ├─ Buyer Phantom (pha_...)  ← same ID as Phantom Buyer
+   │  ├─ Locations
+   │  ├─ Emails
+   │  └─ Phones
+   ├─ Orders
+   └─ Invoices
+```
+
+## Fetching buyers vs. partnerships
+
+When you "fetch buyers" for a supplier, you're actually retrieving <strong>partnerships</strong>.
+Use each partnership's linked phantom to access the buyer's contact details (locations, phones, emails).
+
+## Authentication
+
+Include the following headers in every request:
+- `X-Business-ID`: Your business identifier
+- `X-API-Key`: Your API key
+
+## Create a Buyer
+
+Creates a <strong>phantom buyer bundle</strong> by creating a partnership, phantom, and phantom buyer. You can start minimal and add contact/location data later.
+
+Endpoint: `POST /api/v1/buyers`
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://integrations.polinate.ai/api/v1/buyers" \
+  -H "X-Business-ID: {{businessId}}" \
+  -H "X-API-Key: {{apiKey}}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "buyer": {
+      "name": "Acme Pty Ltd",
+      "legalName": "Acme Pty Ltd"
+    }
+  }'
+```
+
+```json Successful Response
+{
+  "success": true,
+  "id": "buy_123"
+}
+```
+
+```json Unauthorized
+{
+  "errorCode": "UNAUTHORIZED",
+  "message": "Unauthorized",
+  "requestId": "{{requestId}}"
+}
+```
+</CodeGroup>
+
+<Note>
+This operation is idempotent when you provide an <code>Idempotency-Key</code>. Repeating the same key returns the original result.
+</Note>
+
+## Notes
+
+- Optional arrays `emails`, `phones`, and `locations` can be provided when creating a buyer.
+- Use `Idempotency-Key` header for safe retries on POST requests.
+
+

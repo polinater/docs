@@ -11,6 +11,28 @@
   "navigation": {
     "tabs": [
       {
+        "tab": "Guides",
+        "icon": "book",
+        "groups": [
+          {
+            "group": "Basics",
+            "pages": [
+              "guides/authentication",
+              "guides/idempotency",
+              "guides/rate-limits"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              "guides/items",
+              "guides/buyers",
+              "guides/pricing"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "API reference",
         "openapi": "openapi.json"
       }

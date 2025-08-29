@@ -1,0 +1,73 @@
+{
+  "item": {
+    "name": "Widget Deluxe",
+    "handle": "widget-deluxe-2000",
+    "type": "OTHER",
+    "status": "ACTIVE",
+    "description": "A premium multi-purpose widget",
+    "imgUrl": "https://cdn.example.com/widget-deluxe.png",
+    "customType": "HARDWARE",
+    "brand": "Acme",
+    "vendorName": "Acme Manufacturing",
+    "properties": {
+      "colorOptions": [
+        "red",
+        "blue"
+      ]
+    }
+  },
+  "variants": [
+    {
+      "variantName": "Default",
+      "sku": "WID-DEL-DEF",
+      "barcode": "1234567890123",
+      "currency": "AUD",
+      "price": 19.99,
+      "cost": 10,
+      "weight": 0.5,
+      "length": 10,
+      "width": 5,
+      "height": 3
+    },
+    {
+      "variantName": "Large",
+      "sku": "WID-DEL-L",
+      "barcode": "1234567890124",
+      "currency": "AUD",
+      "price": 24.99,
+      "cost": 13
+    },
+    {
+      "variantName": "XS",
+      "sku": "WID-DEL-L",
+      "barcode": "1234567890124",
+      "currency": "AUD",
+      "price": 24.99,
+      "cost": 13
+    },
+    {
+      "variantName": "Med",
+      "sku": "WID-DEL-L",
+      "barcode": "1234567890124",
+      "currency": "AUD",
+      "price": 24.99,
+      "cost": 13
+    },
+    {
+      "variantName": "Small",
+      "sku": "WID-DEL-L",
+      "barcode": "1234567890124",
+      "currency": "AUD",
+      "price": 24.99,
+      "cost": 13
+    },
+    {
+      "variantName": "Brrr",
+      "sku": "WID-DEL-L",
+      "barcode": "1234567890124",
+      "currency": "AUD",
+      "price": 24.99,
+      "cost": 13
+    }
+  ]
+}

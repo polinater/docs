@@ -1,0 +1,122 @@
+---
+title: "Items"
+description: "Create items and variants via the API"
+icon: "box"
+---
+
+# Items
+
+An "item" is a bundle that groups a parent Item with one or more Item Variants and ownership-specific records. The external API lets you create platform item bundles.
+
+<Info>
+You can only create <strong>platform item bundles</strong> via the API. Phantom item bundles exist (for phantom suppliers) but are not creatable externally.
+</Info>
+
+## Item bundle structure
+
+<CardGroup cols={2}>
+  <Card title="Parent Item">
+    The <strong>parent resource</strong> that holds core fields (name, handle, type, status). <strong>Variants are attached to this Item</strong>.
+  </Card>
+  
+  <Card title="Ownership layer">
+    <strong>Platform Item</strong> is an <em>extension</em> of the Item that stores ownership/diverged fields. It <strong>shares the same ID</strong> as the parent Item. Phantom item extensions exist but are not creatable via the external API.
+  </Card>
+</CardGroup>
+
+<CardGroup cols={1}>
+  <Card title="Variants (the real meat)">
+    Variants hold pricing, cost, SKU/barcode, dimensions, and more. Every item must have at least one variant — a single-variant item typically uses a variant named "Default" (similar to Shopify's model).
+  </Card>
+</CardGroup>
+
+## What happens when you create an item
+
+Creating an item via the API orchestrates resources in this order:
+
+<Steps>
+  <Step title="Parent Item is created">
+    Defines the container and core metadata for the item. Variants will attach to this parent Item.
+  </Step>
+  
+  <Step title="Platform Item is created">
+    Ownership-specific <em>extension</em> record for your supplier business that <strong>uses the same ID</strong> as the parent Item.
+  </Step>
+  
+  <Step title="Variants are created">
+    One or more variants are attached to the <strong>parent Item</strong>. At least one is required.
+  </Step>
+</Steps>
+
+## Relationship map
+
+```text
+Supplier (you)
+└─ Item (parent, itm_...)
+   ├─ Platform Item (extension, same id as Item)
+   └─ Variants (one or more)
+```
+
+## Authentication
+
+Include the following headers in every request:
+- `X-Business-ID`: Your business identifier
+- `X-API-Key`: Your API key
+
+## Create an Item
+
+Creates a <strong>platform item bundle</strong> with a parent Item and one or more Variants.
+
+Endpoint: `POST /api/v1/items`
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://integrations.polinate.ai/api/v1/items" \
+  -H "X-Business-ID: {{businessId}}" \
+  -H "X-API-Key: {{apiKey}}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "item": {
+      "name": "Widget",
+      "handle": "widget-1",
+      "type": "OTHER",
+      "status": "ACTIVE"
+    },
+    "variants": [
+      {
+        "variantName": "Default",
+        "currency": "AUD",
+        "price": 12.34,
+        "cost": 8.5
+      }
+    ]
+  }'
+```
+
+```json Successful Response
+{
+  "success": true,
+  "id": "itm_123"
+}
+```
+
+```json Unauthorized
+{
+  "errorCode": "UNAUTHORIZED",
+  "message": "Unauthorized",
+  "requestId": "{{requestId}}"
+}
+```
+</CodeGroup>
+
+
+<Note>
+This operation is idempotent when you provide an <code>Idempotency-Key</code>. Repeating the same key returns the original result.
+</Note>
+
+## Notes
+
+- Provide at least one variant in `variants`.
+- Use `Idempotency-Key` header for safe retries on POST requests.
+
+

@@ -44,9 +44,6 @@
           "message": {
             "type": "string"
           },
-          "requestId": {
-            "type": "string"
-          },
           "fieldErrors": {
             "type": "object",
             "additionalProperties": {
@@ -245,6 +242,22 @@
               "handle": {
                 "type": "string"
               },
+              "description": {
+                "type": "string"
+              },
+              "imgUrl": {
+                "type": "string",
+                "format": "uri"
+              },
+              "customType": {
+                "type": "string"
+              },
+              "brand": {
+                "type": "string"
+              },
+              "vendorName": {
+                "type": "string"
+              },
               "type": {
                 "type": "string",
                 "enum": [
@@ -272,6 +285,9 @@
                   "ARCHIVED",
                   "DELETED"
                 ]
+              },
+              "properties": {
+                "nullable": true
               }
             },
             "required": [
@@ -289,6 +305,18 @@
               "properties": {
                 "variantName": {
                   "type": "string"
+                },
+                "sku": {
+                  "type": "string"
+                },
+                "barcode": {
+                  "type": "string"
+                },
+                "upc": {
+                  "type": "string"
+                },
+                "isDefault": {
+                  "type": "boolean"
                 },
                 "currency": {
                   "type": "string",
@@ -315,6 +343,54 @@
                 },
                 "cost": {
                   "type": "number"
+                },
+                "weight": {
+                  "type": "number"
+                },
+                "length": {
+                  "type": "number"
+                },
+                "width": {
+                  "type": "number"
+                },
+                "height": {
+                  "type": "number"
+                },
+                "unitOfMeasure": {
+                  "type": "string"
+                },
+                "leadTime": {
+                  "type": "number"
+                },
+                "reorderPoint": {
+                  "type": "number"
+                },
+                "reorderQuantity": {
+                  "type": "number"
+                },
+                "inStockQuantity": {
+                  "type": "number"
+                },
+                "onOrderQuantity": {
+                  "type": "number"
+                },
+                "countryOfOrigin": {
+                  "type": "string"
+                },
+                "hsCode": {
+                  "type": "string"
+                },
+                "eccn": {
+                  "type": "string"
+                },
+                "customsDeclarationInfo": {
+                  "type": "string"
+                },
+                "sequence": {
+                  "type": "number"
+                },
+                "properties": {
+                  "nullable": true
                 }
               },
               "required": [
@@ -796,13 +872,17 @@
           "success": {
             "type": "boolean"
           },
-          "id": {
+          "phantomId": {
+            "type": "string"
+          },
+          "partnershipId": {
             "type": "string"
           }
         },
         "required": [
           "success",
-          "id"
+          "phantomId",
+          "partnershipId"
         ]
       },
       "PricingCreateRequest": {
@@ -949,16 +1029,6 @@
             "required": false,
             "name": "Idempotency-Key",
             "in": "header"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Correlation ID for observability",
-              "example": "{{requestId}}"
-            },
-            "required": false,
-            "name": "X-Request-Id",
-            "in": "header"
           }
         ],
         "requestBody": {
@@ -968,21 +1038,70 @@
               "schema": {
                 "$ref": "#/components/schemas/ItemCreateRequest"
               },
-              "example": {
-                "item": {
-                  "name": "Widget",
-                  "handle": "widget-1",
-                  "type": "OTHER",
-                  "status": "ACTIVE"
-                },
-                "variants": [
-                  {
-                    "variantName": "Default",
-                    "currency": "AUD",
-                    "price": 12.34,
-                    "cost": 8.5
+              "examples": {
+                "Minimal": {
+                  "summary": "Minimal required fields",
+                  "value": {
+                    "item": {
+                      "name": "Widget",
+                      "handle": "widget-1",
+                      "type": "OTHER",
+                      "status": "ACTIVE"
+                    },
+                    "variants": [
+                      {
+                        "variantName": "Default",
+                        "currency": "AUD",
+                        "price": 12.34,
+                        "cost": 8.5
+                      }
+                    ]
                   }
-                ]
+                },
+                "Full": {
+                  "summary": "All supported fields with multiple variants",
+                  "value": {
+                    "item": {
+                      "name": "Widget Deluxe",
+                      "handle": "widget-deluxe-2000",
+                      "type": "OTHER",
+                      "status": "ACTIVE",
+                      "description": "A premium multi-purpose widget",
+                      "imgUrl": "https://cdn.example.com/widget-deluxe.png",
+                      "customType": "HARDWARE",
+                      "brand": "Acme",
+                      "vendorName": "Acme Manufacturing",
+                      "properties": {
+                        "colorOptions": [
+                          "red",
+                          "blue"
+                        ]
+                      }
+                    },
+                    "variants": [
+                      {
+                        "variantName": "Default",
+                        "sku": "WID-DEL-DEF",
+                        "barcode": "1234567890123",
+                        "currency": "AUD",
+                        "price": 19.99,
+                        "cost": 10,
+                        "weight": 0.5,
+                        "length": 10,
+                        "width": 5,
+                        "height": 3
+                      },
+                      {
+                        "variantName": "Large",
+                        "sku": "WID-DEL-L",
+                        "barcode": "1234567890124",
+                        "currency": "AUD",
+                        "price": 24.99,
+                        "cost": 13
+                      }
+                    ]
+                  }
+                }
               }
             }
           }
@@ -1072,16 +1191,6 @@
             },
             "required": false,
             "name": "Idempotency-Key",
-            "in": "header"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Correlation ID for observability",
-              "example": "{{requestId}}"
-            },
-            "required": false,
-            "name": "X-Request-Id",
             "in": "header"
           }
         ],
@@ -1187,7 +1296,8 @@
                 },
                 "example": {
                   "success": true,
-                  "id": "buy_123"
+                  "phantomId": "phm_123",
+                  "partnershipId": "prt_123"
                 }
               }
             }
@@ -1205,7 +1315,6 @@
                     "value": {
                       "errorCode": "VALIDATION_ERROR",
                       "message": "Some information looks incorrect. Please review the highlighted fields.",
-                      "requestId": "{{requestId}}",
                       "fieldErrors": {
                         "buyer.name": "Required",
                         "buyer.legalName": "Required"
@@ -1217,7 +1326,6 @@
                     "value": {
                       "errorCode": "VALIDATION_ERROR",
                       "message": "Some information looks incorrect. Please review the highlighted fields.",
-                      "requestId": "{{requestId}}",
                       "fieldErrors": {
                         "emails.1.email": "Duplicate email addresses are not allowed."
                       }
@@ -1228,7 +1336,6 @@
                     "value": {
                       "errorCode": "VALIDATION_ERROR",
                       "message": "Some information looks incorrect. Please review the highlighted fields.",
-                      "requestId": "{{requestId}}",
                       "fieldErrors": {
                         "phones.1.phone": "Duplicate phone numbers are not allowed."
                       }
@@ -1239,7 +1346,6 @@
                     "value": {
                       "errorCode": "VALIDATION_ERROR",
                       "message": "Some information looks incorrect. Please review the highlighted fields.",
-                      "requestId": "{{requestId}}",
                       "fieldErrors": {
                         "locations.1.label": "Duplicate location labels are not allowed."
                       }
@@ -1258,8 +1364,7 @@
                 },
                 "example": {
                   "errorCode": "UNAUTHORIZED",
-                  "message": "Unauthorized",
-                  "requestId": "{{requestId}}"
+                  "message": "Unauthorized"
                 }
               }
             }
@@ -1276,24 +1381,21 @@
                     "summary": "Buyer email unique",
                     "value": {
                       "errorCode": "CONFLICT",
-                      "message": "This buyer already has that email address.",
-                      "requestId": "{{requestId}}"
+                      "message": "This buyer already has that email address."
                     }
                   },
                   "PhoneConflict": {
                     "summary": "Buyer phone unique",
                     "value": {
                       "errorCode": "CONFLICT",
-                      "message": "This buyer already has that phone number.",
-                      "requestId": "{{requestId}}"
+                      "message": "This buyer already has that phone number."
                     }
                   },
                   "LocationLabelConflict": {
                     "summary": "Location label unique",
                     "value": {
                       "errorCode": "CONFLICT",
-                      "message": "This buyer already has a location with that label.",
-                      "requestId": "{{requestId}}"
+                      "message": "This buyer already has a location with that label."
                     }
                   }
                 }
@@ -1312,8 +1414,7 @@
                     "summary": "Too many requests",
                     "value": {
                       "errorCode": "RATE_LIMITED",
-                      "message": "You’re sending requests too quickly. Please try again shortly.",
-                      "requestId": "{{requestId}}"
+                      "message": "You’re sending requests too quickly. Please try again shortly."
                     }
                   }
                 }
@@ -1329,8 +1430,7 @@
                 },
                 "example": {
                   "errorCode": "INTERNAL_ERROR",
-                  "message": "Default item list missing or duplicated",
-                  "requestId": "{{requestId}}"
+                  "message": "Default item list missing or duplicated"
                 }
               }
             }
@@ -1375,16 +1475,6 @@
             },
             "required": false,
             "name": "Idempotency-Key",
-            "in": "header"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Correlation ID for observability",
-              "example": "{{requestId}}"
-            },
-            "required": false,
-            "name": "X-Request-Id",
             "in": "header"
           }
         ],
@@ -1623,16 +1713,6 @@
             "required": true,
             "name": "X-API-Key",
             "in": "header"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Correlation ID for observability",
-              "example": "{{requestId}}"
-            },
-            "required": false,
-            "name": "X-Request-Id",
-            "in": "header"
           }
         ],
         "responses": {
@@ -1721,16 +1801,6 @@
             },
             "required": true,
             "name": "X-API-Key",
-            "in": "header"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Correlation ID for observability",
-              "example": "{{requestId}}"
-            },
-            "required": false,
-            "name": "X-Request-Id",
             "in": "header"
           }
         ],
@@ -1827,16 +1897,6 @@
             },
             "required": false,
             "name": "Idempotency-Key",
-            "in": "header"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Correlation ID for observability",
-              "example": "{{requestId}}"
-            },
-            "required": false,
-            "name": "X-Request-Id",
             "in": "header"
           }
         ],
@@ -1966,16 +2026,6 @@
             },
             "required": false,
             "name": "Idempotency-Key",
-            "in": "header"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Correlation ID for observability",
-              "example": "{{requestId}}"
-            },
-            "required": false,
-            "name": "X-Request-Id",
             "in": "header"
           }
         ],

@@ -1,0 +1,36 @@
+---
+title: "Idempotency"
+description: "Ensure safe retries for POST operations using Idempotency-Key"
+icon: "repeat"
+---
+
+# Idempotency
+
+Idempotency lets you safely retry POST requests without creating duplicate resources.
+
+## Header
+
+Include an `Idempotency-Key` header on POST requests. Reusing the same key will return the original result for duplicates.
+
+## Example
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://integrations.polinate.ai/api/v1/items" \
+  -H "X-Business-ID: {{businessId}}" \
+  -H "X-API-Key: {{apiKey}}" \
+  -H "Idempotency-Key: {{idempotencyKey}}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "item": {"name": "Widget", "handle": "widget-1", "type": "OTHER", "status": "ACTIVE"},
+    "variants": [{"variantName": "Default", "currency": "AUD", "price": 12.34, "cost": 8.5}]
+  }'
+```
+</CodeGroup>
+
+## Notes
+
+- Use a unique key per logical operation.
+- Keys should be unique and stable across retries.
+
+

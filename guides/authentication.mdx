@@ -1,0 +1,172 @@
+---
+title: "Authentication"
+description: "Learn how to authenticate with the Polinate API using Business ID and API Key headers"
+icon: "key"
+---
+
+# API Authentication
+
+The Polinate API uses a simple header-based authentication system that requires two key pieces of information from your business settings. This guide will walk you through finding your credentials and implementing authentication in your requests.
+
+<Info>
+All API requests must include both the Business ID and API Key headers for successful authentication.
+</Info>
+
+## Authentication Overview
+
+Our API uses header-based authentication with two required headers:
+- `X-Business-ID`: Your unique business identifier
+- `X-API-Key`: Your secret API key for secure access
+
+
+
+## Finding Your Credentials
+
+Your authentication credentials are located in your Polinate business settings. Follow these steps to locate them:
+
+<Steps>
+  <Step title="Navigate to Business Settings">
+    Log into your Polinate dashboard at [supplier.polinate.ai](https://supplier.polinate.ai) and navigate to your business settings.
+  </Step>
+  
+  <Step title="Access the Integrations Section">
+    In the business settings, look for the **Integrations** section in the sidebar or main navigation.
+  </Step>
+  
+  <Step title="Copy Your Credentials">
+    You'll find two important values:
+    - **Business ID**: A unique identifier for your business
+    - **API Key**: A secret key used for authentication
+    
+    <Warning>
+    Keep your API Key secure and never share it publicly. Treat it like a password.
+    </Warning>
+  </Step>
+</Steps>
+
+<Frame caption="Location of Business ID and API Key in the Integrations section">
+  <img 
+    src="/images/business-settings.png" 
+    alt="Screenshot showing the Business Settings page with the Integrations section highlighted, displaying Business ID and API Key fields"
+    className="rounded-lg border"
+  />
+</Frame>
+
+## Implementation Examples
+
+Here's how to include the authentication headers in your API requests:
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://api.polinate.ai/v1/your-endpoint" \
+  -H "X-Business-ID: your-business-id-here" \
+  -H "X-API-Key: your-api-key-here" \
+  -H "Content-Type: application/json"
+```
+
+```javascript JavaScript/Node.js
+const response = await fetch('https://api.polinate.ai/v1/your-endpoint', {
+  method: 'GET',
+  headers: {
+    'X-Business-ID': 'your-business-id-here',
+    'X-API-Key': 'your-api-key-here',
+    'Content-Type': 'application/json'
+  }
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+headers = {
+    'X-Business-ID': 'your-business-id-here',
+    'X-API-Key': 'your-api-key-here',
+    'Content-Type': 'application/json'
+}
+
+response = requests.get(
+    'https://api.polinate.ai/v1/your-endpoint',
+    headers=headers
+)
+
+data = response.json()
+```
+
+```php PHP
+<?php
+$headers = [
+    'X-Business-ID: your-business-id-here',
+    'X-API-Key: your-api-key-here',
+    'Content-Type: application/json'
+];
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, 'https://api.polinate.ai/v1/your-endpoint');
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$data = json_decode($response, true);
+?>
+```
+</CodeGroup>
+
+## Authentication Headers Reference
+
+<ResponseField name="X-Business-ID" type="string" required>
+  Your unique business identifier found in the Integrations section of your business settings.
+  
+  **Example**: `bus_1234567890abcdef`
+</ResponseField>
+
+<ResponseField name="X-API-Key" type="string" required>
+  Your secret API key for authentication. This key should be kept secure and never exposed in client-side code.
+  
+  **Example**: `1234567890abcdef1234567890abcdef`
+</ResponseField>
+
+ 
+
+## Error Response
+
+Authentication errors return the following response when the provided headers are missing, invalid, or do not match your business credentials:
+
+```json
+{
+  "errorCode": "UNAUTHORIZED",
+  "message": "Unauthorized",
+  "requestId": "{{requestId}}"
+}
+```
+
+- **errorCode**: Always `UNAUTHORIZED` for authentication failures.
+- **message**: A human-readable description of the error.
+- **requestId**: An identifier for the request, useful when contacting support.
+
+ 
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="I can't find my Business ID or API Key">
+    Make sure you're logged into the correct account at [supplier.polinate.ai](https://supplier.polinate.ai). Navigate to Business Settings → Integrations. If you still can't find them, contact our support team.
+  </Accordion>
+  
+  <Accordion title="Getting 401 Unauthorized errors">
+    Double-check that:
+    - Both `X-Business-ID` and `X-API-Key` headers are included
+    - The header names are spelled correctly (case-sensitive)
+    - You're using the correct values from your business settings
+    - Your API key hasn't expired or been revoked
+  </Accordion>
+</AccordionGroup>
+
+ 
+
+<Note>
+Need help? Contact our support team at [support@polinate.ai](mailto:admin@polinate.ai) or join our [slack](https://www.polinate.ai).
+</Note>
