@@ -240,7 +240,8 @@
                 "type": "string"
               },
               "handle": {
-                "type": "string"
+                "type": "string",
+                "description": "Unique across all items"
               },
               "description": {
                 "type": "string"
@@ -287,7 +288,8 @@
                 ]
               },
               "properties": {
-                "nullable": true
+                "type": "object",
+                "properties": {}
               }
             },
             "required": [
@@ -304,7 +306,8 @@
               "type": "object",
               "properties": {
                 "variantName": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Unique per item"
                 },
                 "sku": {
                   "type": "string"
@@ -390,7 +393,8 @@
                   "type": "number"
                 },
                 "properties": {
-                  "nullable": true
+                  "type": "object",
+                  "properties": {}
                 }
               },
               "required": [
@@ -578,7 +582,8 @@
               "type": "object",
               "properties": {
                 "phone": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Must be unique per buyer"
                 },
                 "contactName": {
                   "type": "string"
@@ -610,7 +615,8 @@
               "properties": {
                 "email": {
                   "type": "string",
-                  "format": "email"
+                  "format": "email",
+                  "description": "Must be unique per buyer"
                 },
                 "contactName": {
                   "type": "string"
@@ -641,7 +647,8 @@
               "type": "object",
               "properties": {
                 "label": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Must be unique per buyer"
                 },
                 "type": {
                   "type": "string",
@@ -1143,6 +1150,14 @@
           },
           "429": {
             "description": "Rate limited",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Seconds to wait before retrying"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1404,6 +1419,14 @@
           },
           "429": {
             "description": "Rate limited",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Seconds to wait before retrying"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1489,7 +1512,34 @@
                     "type": "object",
                     "properties": {
                       "label": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Must be unique per supplier business"
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "DRAFT",
+                          "ACTIVE",
+                          "ARCHIVED"
+                        ]
+                      },
+                      "startDate": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "date-time"
+                      },
+                      "endDate": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "date-time"
+                      },
+                      "globalPriceFactor": {
+                        "type": "number",
+                        "nullable": true
+                      },
+                      "globalCostFactor": {
+                        "type": "number",
+                        "nullable": true
                       }
                     },
                     "required": [
@@ -1502,11 +1552,9 @@
                     "items": {
                       "type": "object",
                       "properties": {
-                        "itemListId": {
-                          "type": "string"
-                        },
                         "itemVariantId": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Cannot repeat for the same list"
                         },
                         "currency": {
                           "type": "string",
@@ -1528,15 +1576,23 @@
                             "PHP"
                           ]
                         },
-                        "price": {
+                        "overrideFlatPrice": {
                           "type": "number"
                         },
-                        "cost": {
+                        "overrideFlatCost": {
                           "type": "number"
+                        },
+                        "overridePriceFactor": {
+                          "type": "number"
+                        },
+                        "overrideCostFactor": {
+                          "type": "number"
+                        },
+                        "label": {
+                          "type": "string"
                         }
                       },
                       "required": [
-                        "itemListId",
                         "itemVariantId"
                       ],
                       "additionalProperties": false
@@ -1558,13 +1614,17 @@
               },
               "example": {
                 "itemListData": {
-                  "label": "Winter 2025"
+                  "label": "Winter 2025",
+                  "status": "ACTIVE",
+                  "globalPriceFactor": 1.05,
+                  "globalCostFactor": 0.95,
+                  "startDate": "2025-06-01T00:00:00Z",
+                  "endDate": "2025-08-31T23:59:59Z"
                 },
                 "entries": [
                   {
-                    "itemListId": "list_123",
                     "itemVariantId": "var_123",
-                    "price": 10,
+                    "overrideFlatPrice": 10,
                     "currency": "AUD"
                   }
                 ],
@@ -1611,6 +1671,14 @@
           },
           "429": {
             "description": "Rate limited",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Seconds to wait before retrying"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1754,6 +1822,14 @@
           },
           "429": {
             "description": "Rate limited",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Seconds to wait before retrying"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1842,6 +1918,14 @@
           },
           "429": {
             "description": "Rate limited",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Seconds to wait before retrying"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1978,6 +2062,14 @@
           },
           "429": {
             "description": "Rate limited",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Seconds to wait before retrying"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2069,6 +2161,14 @@
           },
           "429": {
             "description": "Rate limited",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Seconds to wait before retrying"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
