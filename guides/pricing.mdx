@@ -6,7 +6,58 @@ icon: "tag"
 
 # Pricing
 
-Use the Pricing API to create a price list with entries and optionally assign it to partnerships (buyers).
+Pricing revolves around the Item List, which is a price list owned by a supplier and expanded with richer pricing functionality.
+
+<Info>
+An <strong>Item List</strong> is a price list plus extras (taxes, costs, branching, and global adjustments). Most partners treat it as a simple price list.
+</Info>
+
+## Item List structure
+
+<CardGroup cols={2}>
+  <Card title="Partnership assignments">
+    Array of partnerships (buyers) this Item List is applied to. Assigned partnerships get these prices, which override the buyer’s default item variant prices.
+  </Card>
+  
+  <Card title="Entries (variant joins)">
+    Array of entries that each link to an Item Variant. Each entry overrides pricing fields (e.g., price, currency) for that variant under this Item List.
+  </Card>
+</CardGroup>
+
+<CardGroup cols={1}>
+  <Card title="Global overrides">
+    The Item List can include global percentage adjustments (e.g., discount factors) that apply across entries.
+  </Card>
+</CardGroup>
+
+## Default Item List
+
+<Info>
+Every supplier has a <strong>Default Item List</strong>. It is automatically applied to all newly created buyers (partnerships) when no specific Item List is assigned.
+</Info>
+
+- No global overrides are applied on the Default Item List.
+- Entries on the Default Item List do not override pricing; prices come from the underlying Item Variant.
+- When new Items are created, <strong>all variants are automatically included</strong> on the Default Item List.
+- If a partnership is later assigned a specific Item List, that assignment overrides the Default Item List for that partnership.
+
+## Relationship map
+
+```text
+Supplier (you)
+└─ Item List (owned by supplier)
+   ├─ Partnerships [prt_...] (assignments; 1 list per partnership)
+   └─ Entries [→ Item Variants] (override variant price under this list)
+```
+
+## Fetching item lists
+
+When fetching an Item List, we group entries by their parent Items for readability. Conceptually, it’s still a list of <strong>variants</strong> and a list of <strong>partnerships</strong>.
+
+## Constraints
+
+- Each partnership can have <strong>at most one</strong> assigned Item List.
+- All partnerships and item variants referenced must already exist.
 
 ## Authentication
 
@@ -14,9 +65,9 @@ Include the following headers in every request:
 - `X-Business-ID`: Your business identifier
 - `X-API-Key`: Your API key
 
-## Create a Price List
+## Create an Item List
 
-Creates a price list and one or more entries.
+Creates an Item List and one or more entries, and optionally assigns partnerships.
 
 Endpoint: `POST /api/v1/pricing`
 
@@ -49,6 +100,10 @@ curl -X POST "https://integrations.polinate.ai/api/v1/pricing" \
 }
 ```
 </CodeGroup>
+
+<Note>
+This operation is idempotent when you provide an <code>Idempotency-Key</code>. Repeating the same key returns the original result.
+</Note>
 
 ## Notes
 

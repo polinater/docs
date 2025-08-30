@@ -25,7 +25,7 @@ We use a token bucket model to ensure fair usage and stability.
 ## Handling 429 responses
 
 - Back off and retry after a short delay.
-- Respect the `Retry-After` header if present.
+- 429 responses <strong>always include</strong> a `Retry-After` header <strong>in seconds</strong>. Honor this value before retrying.
 - Use batching and idempotency where possible.
 
 ## Example 429 response
@@ -37,5 +37,17 @@ We use a token bucket model to ensure fair usage and stability.
   "requestId": "{{requestId}}"
 }
 ```
+
+### Headers
+
+```http
+HTTP/1.1 429 Too Many Requests
+Retry-After: 3
+Content-Type: application/json
+```
+
+<Note>
+`Retry-After` is expressed in seconds.
+</Note>
 
 
