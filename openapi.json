@@ -435,10 +435,6 @@
           "legalName"
         ]
       },
-      "BuyerInfoPublic": {
-        "type": "object",
-        "properties": {}
-      },
       "BuyerPhonePublic": {
         "type": "object",
         "properties": {
@@ -571,10 +567,6 @@
               "name",
               "legalName"
             ]
-          },
-          "buyerInfo": {
-            "type": "object",
-            "properties": {}
           },
           "phones": {
             "type": "array",
@@ -1234,9 +1226,6 @@
                       "legalName": "Globex Trading Company Pty Ltd",
                       "primaryEmail": "accounts@globex.example",
                       "primaryPhone": "+61 2 9000 0000"
-                    },
-                    "buyerInfo": {
-                      "taxNumber": "ABN 12 345 678 901"
                     },
                     "emails": [
                       {
